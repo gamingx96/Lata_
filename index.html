@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For Premlata</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: black;
+      font-family: 'Arial', sans-serif;
+      color: white;
+      overflow: hidden;
+      text-align: center;
+    }
+    .welcome-text {
+      font-size: 3rem;
+      margin-top: 20vh;
+      color: #ff69b4;
+      text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff1493;
+      animation: pulseGlow 2s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { text-shadow: 0 0 10px #ff69b4; }
+      to { text-shadow: 0 0 30px #ff1493, 0 0 60px #ff1493; }
+    }
+    #startBtn {
+      margin-top: 40px;
+      padding: 15px 40px;
+      font-size: 1.5rem;
+      background: linear-gradient(45deg, #ff1493, #00ffff);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      color: black;
+      font-weight: bold;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    .lyrics, .letter {
+      display: none;
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff;
+    }
+    .letter {
+      background: white;
+      color: black;
+      width: 80%;
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 30px #ff69b4;
+      text-align: left;
+      animation: fadeInZoom 2s forwards;
+    }
+    @keyframes fadeInZoom {
+      0% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="welcome-text">🌸 Premlata, Welcome 🌸</div>
+  <button id="startBtn">Click to Start ✨</button>
+
+  <canvas id="fireworksCanvas"></canvas>
+  <div class="lyrics" id="lyrics"></div>
+  <div class="letter" id="letter">
+    <h3>From: Mr. Chess Boy ♟️</h3>
+    <p>Dear Premlata,</p>
+    <p>I don’t want to impress you with this website,<br>
+       I just want to express a small wish from the heart...</p>
+    <p><strong>Would you like to be my friend? 🤝</strong></p>
+    <p>Yours sincerely,<br>Mr. Chess Boy</p>
+  </div>
+
+  <audio id="song" loop><source src="Jaadu Mantar Haan Mantar, Tujhya Swag OG OG.. SK x.mp3"</audio>
+ <script>
+  const btn = document.getElementById('startBtn');
+  const lyricsBox = document.getElementById('lyrics');
+  const song = document.getElementById('song');
+  const letter = document.getElementById('letter');
+
+  const lyricsLines = [
+    "🍁😷Ruko to ...",
+    "🍷👻 Aage baki he ...",
+    "💯Jana mat 💅......",
+    "🌸bas ho gaya🌸......",
+    "loading 10%..30%..98% ..."
+  ];
+
+  let index = 0;
+
+  btn.onclick = () => {
+    btn.style.display = 'none';
+    startFireworks();
+    song.play();
+    lyricsBox.style.display = 'block';
+    showLyrics();
+  };
+
+  function showLyrics() {
+    if (index < lyricsLines.length) {
+      lyricsBox.innerText = lyricsLines[index];
+      index++;
+      setTimeout(showLyrics, 4000);
+    } else {
+      setTimeout(() => {
+        letter.style.display = 'block';
+      }, 2000);
+    }
+  }
+
+  // Fireworks code optimized
+  const canvas = document.getElementById("fireworksCanvas");
+  const ctx = canvas.getContext("2d");
+
+  let particles = [];
+  let lastFirework = 0;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function createFirework() {
+    let x = Math.random() * canvas.width;
+    let y = Math.random() * canvas.height / 2;
+    let colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"];
+    for (let i = 0; i < 40; i++) { // reduced particles from 100 to 40
+      particles.push({
+        x, y,
+        radius: Math.random() * 2 + 1,
+        angle: Math.random() * 2 * Math.PI,
+        speed: Math.random() * 3 + 0.5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 1
+      });
+    }
+  }
+
+  function animateFireworks(timestamp) {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    particles = particles.filter(p => p.alpha > 0);
+    for (let p of particles) {
+      let vx = Math.cos(p.angle) * p.speed;
+      let vy = Math.sin(p.angle) * p.speed;
+      p.x += vx;
+      p.y += vy;
+      p.alpha -= 0.015;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${hexToRgb(p.color)}, ${p.alpha})`;
+      ctx.fill();
+    }
+
+    // Limit firework creation to every 500ms
+    if (timestamp - lastFirework > 500) {
+      createFirework();
+      lastFirework = timestamp;
+    }
+
+    requestAnimationFrame(animateFireworks);
+  }
+
+  function hexToRgb(hex) {
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `${r}, ${g}, ${b}`;
+  }
+
+  function startFireworks() {
+    requestAnimationFrame(animateFireworks);
+  }
+</script>
+</body>
+</html>
